@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * @file
+ * Axelerant test module.
+ *
+ * Functions used for adding Site API key in site configuration form.
+ * Also generate json respresentation of given content nid.
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function axelerant_test_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['site_information']['siteapikey'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Site API Key'),
+      '#description' => t('Please enter your site API key'),
+      '#default_value' => variable_get('siteapikey', t('No API key yet')),
+    );
+    $form['#submit'][] = 'axelerant_test_system_settings_form_submit';
+    $form['actions']['submit']['#value'] = t('Update Configuration');
+  }
+}
+
+/**
+ * Custom submit callback function for site information settings form.
+ * To display the site message after submitting form.
+ */
+function axelerant_test_system_settings_form_submit($form, &$form_state) {
+  drupal_set_message(t('Site API Key @siteapikey has been saved', array('@siteapikey' => $form_state['values']['siteapikey'])));
+}
+
+/**
+ * Implements hook_menu().
+ */
+function axelerant_test_menu() {
+  $items['page_json/%/%'] = array(
+    'title' => 'JSON respresentation of given node',
+    'page callback' => 'axelerant_test_get_node_json',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Menu page callback function to display json format of given node.
+ * Note :: By considering 1st argument FOOBAR12345 is siteapikey and 17 is nid
+ * in the example url "http://localhost/page_json/FOOBAR12345/17".
+ *
+ * @param string $siteapikey
+ *   The Site Api key.
+ *
+ * @param int $nid
+ *   The node id.
+ *
+ * @return mixed
+ *   A json node output or access denied message page.
+ */
+function axelerant_test_get_node_json($siteapikey, $nid) {
+  // Check if nid is numeric.
+  if (is_numeric($nid)) {
+    $node = node_load($nid);
+    // Check if node is present and of type page also checked siteapi key.
+    if (!empty($node) && $node->type == "page" && $siteapikey == variable_get('siteapikey', t('No API key yet'))) {
+      drupal_json_output($node);
+      drupal_exit();
+    }
+  }
+  // Respond user with access denied message if not valid nid and siteapikey.
+  drupal_access_denied();
+}

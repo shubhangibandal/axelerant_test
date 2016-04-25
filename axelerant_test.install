@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Installation file for axerelant test module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function axelerant_test_uninstall() {
+  // Delete Site Api key variable created by module.
+  variable_del('siteapikey');
+}

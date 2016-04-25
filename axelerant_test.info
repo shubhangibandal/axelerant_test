@@ -1,0 +1,6 @@
+name = Axelerant test
+description = This module add's site api key and provide the json respresentation of given node.
+package = Axelerant
+core = 7.x
+configure = admin/config/system/site-information
+version = 7.x-1.0
